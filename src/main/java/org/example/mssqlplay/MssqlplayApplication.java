@@ -11,6 +11,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -30,7 +32,9 @@ public class MssqlplayApplication {
         try ( BufferedReader reader = new BufferedReader(new InputStreamReader(new ClassPathResource("Report.json").getInputStream()))) {
             Reports reports = objectMapper.readValue(reader, Reports.class);
             System.out.println(reports.reports.size());
-            reportService.updateData(reports).block();
+            Mono.from(reportService.updateData(reports))
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .block();
 //            System.out.println(count);
         }
     }
