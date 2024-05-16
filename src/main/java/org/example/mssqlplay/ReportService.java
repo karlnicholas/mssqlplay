@@ -25,14 +25,14 @@ public class ReportService {
                     rptParent.setRptName(rptParentDto.name);
                     return rptParentRepository.save(rptParent)
                             .map(RptParent::getRptNr)
-                            .flatMapMany(rptNr -> Flux.fromIterable(rptParentDto.rptChildDtoList)
+                            .flatMap(rptNr -> Flux.fromIterable(rptParentDto.rptChildDtoList)
                                     .map(rptChildDto -> {
                                         RptChild rptChild = new RptChild();
                                         rptChild.rptNr = rptNr;
                                         rptChild.pghName = rptChildDto.pghName;
                                         return rptChild;
                                     }).collectList())
-                            .flatMap(rptChildRepository::saveAll)
+                            .flatMapMany(rptChildRepository::saveAll)
                     .as(transactionalOperator::transactional);
                 }).count();
     }
