@@ -26,12 +26,13 @@ public class ReportService {
                     return rptParentRepository.save(rptParent)
                             .map(RptParent::getRptNr)
                             .flatMapMany(rptNr -> Flux.fromIterable(rptParentDto.rptChildDtoList)
-                                    .flatMap(rptChildDto -> {
+                                    .map(rptChildDto -> {
                                         RptChild rptChild = new RptChild();
                                         rptChild.rptNr = rptNr;
                                         rptChild.pghName = rptChildDto.pghName;
-                                        return Mono.just(rptChild);
-                                    }).collectList()).flatMap(rptChildRepository::saveAll)
+                                        return rptChild;
+                                    }).collectList())
+                            .flatMap(rptChildRepository::saveAll)
                     .as(transactionalOperator::transactional);
                 }).count();
     }
