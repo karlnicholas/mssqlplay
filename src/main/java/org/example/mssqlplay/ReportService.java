@@ -17,6 +17,7 @@ public class ReportService {
         this.transactionalOperator = transactionalOperator;
     }
 
+    // Using repo::saveAll and global transaction
     public Mono<Long> updateData(Reports reports) {
         return Flux.fromIterable(reports.reports)
                 .flatMap(rptParentDto -> {
@@ -29,11 +30,28 @@ public class ReportService {
                                         RptChild rptChild = new RptChild();
                                         rptChild.rptNr = rptNr;
                                         rptChild.pghName = rptChildDto.pghName;
-                                        return rptChildRepository.save(rptChild);
-                                    }))
-                            .as(transactionalOperator::transactional);
-                }).count();
+                                        return Mono.just(rptChild);
+                                    }).collectList()).flatMap(rptChildRepository::saveAll);
+                }).as(transactionalOperator::transactional).count();
     }
+
+//    public Mono<Long> updateData(Reports reports) {
+//        return Flux.fromIterable(reports.reports)
+//                .flatMap(rptParentDto -> {
+//                    RptParent rptParent = new RptParent();
+//                    rptParent.setRptName(rptParentDto.name);
+//                    return rptParentRepository.save(rptParent)
+//                            .map(RptParent::getRptNr)
+//                            .flatMapMany(rptNr -> Flux.fromIterable(rptParentDto.rptChildDtoList)
+//                                    .flatMap(rptChildDto -> {
+//                                        RptChild rptChild = new RptChild();
+//                                        rptChild.rptNr = rptNr;
+//                                        rptChild.pghName = rptChildDto.pghName;
+//                                        return rptChildRepository.save(rptChild);
+//                                    }))
+//                            .as(transactionalOperator::transactional);
+//                }).count();
+//    }
 
 //    public Mono<Long> updateData(Reports reports) {
 //        return Mono.zip(reports.reports.stream().map(rptParentDto -> {
