@@ -30,8 +30,8 @@ public class MssqlplayApplication {
         try ( BufferedReader reader = new BufferedReader(new InputStreamReader(new ClassPathResource("Report.json").getInputStream()))) {
             Reports reports = objectMapper.readValue(reader, Reports.class);
             System.out.println(reports.reports.size());
-            Long count = reportService.updateData(reports).block();
-            System.out.println(count);
+            reportService.updateData(reports).block();
+//            System.out.println(count);
         }
     }
     @Bean

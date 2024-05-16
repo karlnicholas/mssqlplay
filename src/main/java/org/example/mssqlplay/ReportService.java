@@ -58,7 +58,7 @@ public class ReportService {
 //                }).count();
 //    }
 
-    public Mono<Long> updateData(Reports reports) {
+    public Mono<Void> updateData(Reports reports) {
         return Mono.zip(reports.reports.stream().map(rptParentDto -> {
             RptParent rptParent = new RptParent();
             rptParent.setRptName(rptParentDto.name);
@@ -74,6 +74,6 @@ public class ReportService {
                     .flatMapMany(rptChildRepository::saveAll)
                     .then()
                     .as(transactionalOperator::transactional);
-        }).toList(), objects -> 1L);
+        }).toList(), objects->null);
     }
 }
