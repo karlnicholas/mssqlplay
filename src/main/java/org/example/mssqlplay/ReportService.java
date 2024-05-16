@@ -72,8 +72,8 @@ public class ReportService {
                                     }).toList()
                             )
                     .flatMapMany(rptChildRepository::saveAll)
-                    .as(transactionalOperator::transactional)
-                    .collectList();
-        }).toList(), objects -> Long.valueOf(objects.length));
+                    .then()
+                    .as(transactionalOperator::transactional);
+        }).toList(), objects -> 1L);
     }
 }
