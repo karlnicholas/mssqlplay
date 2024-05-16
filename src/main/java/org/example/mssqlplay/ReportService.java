@@ -17,7 +17,7 @@ public class ReportService {
         this.transactionalOperator = transactionalOperator;
     }
 
-    // Using repo::saveAll and global transaction
+    // Using repo::saveAll and not global transaction
     public Mono<Long> updateData(Reports reports) {
         return Flux.fromIterable(reports.reports)
                 .flatMap(rptParentDto -> {
@@ -31,8 +31,9 @@ public class ReportService {
                                         rptChild.rptNr = rptNr;
                                         rptChild.pghName = rptChildDto.pghName;
                                         return Mono.just(rptChild);
-                                    }).collectList()).flatMap(rptChildRepository::saveAll);
-                }).as(transactionalOperator::transactional).count();
+                                    }).collectList()).flatMap(rptChildRepository::saveAll)
+                    .as(transactionalOperator::transactional);
+                }).count();
     }
 
 //    public Mono<Long> updateData(Reports reports) {
