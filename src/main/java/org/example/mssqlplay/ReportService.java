@@ -18,62 +18,27 @@ public class ReportService {
     }
 
     // Using repo::saveAll and not global transaction
-//    public Mono<Long> updateData(Reports reports) {
-//        return Flux.fromIterable(reports.reports)
-//                .flatMap(rptParentDto -> {
-//                    RptParent rptParent = new RptParent();
-//                    rptParent.setRptName(rptParentDto.name);
-//                    return rptParentRepository.save(rptParent)
-//                            .map(RptParent::getRptNr)
-//                            .map(rptNr -> rptParentDto.rptChildDtoList
-//                                    .stream()
-//                                    .map(rptChildDto -> {
-//                                        RptChild rptChild = new RptChild();
-//                                        rptChild.rptNr = rptNr;
-//                                        rptChild.pghName = rptChildDto.pghName;
-//                                        return rptChild;
-//                                    })
-//                                    .toList()
-//                            )
-//                            .flatMapMany(rptChildRepository::saveAll)
-//                    .as(transactionalOperator::transactional);
-//                }).count();
-//    }
-
-//    public Mono<Long> updateData(Reports reports) {
-//        return Flux.fromIterable(reports.reports)
-//                .flatMap(rptParentDto -> {
-//                    RptParent rptParent = new RptParent();
-//                    rptParent.setRptName(rptParentDto.name);
-//                    return rptParentRepository.save(rptParent)
-//                            .map(RptParent::getRptNr)
-//                            .flatMapMany(rptNr -> Flux.fromIterable(rptParentDto.rptChildDtoList)
-//                                    .flatMap(rptChildDto -> {
-//                                        RptChild rptChild = new RptChild();
-//                                        rptChild.rptNr = rptNr;
-//                                        rptChild.pghName = rptChildDto.pghName;
-//                                        return rptChildRepository.save(rptChild);
-//                                    }))
-//                            .as(transactionalOperator::transactional);
-//                }).count();
-//    }
-
     public Mono<Void> updateData(Reports reports) {
-        return Mono.zip(reports.reports.stream().map(rptParentDto -> {
-            RptParent rptParent = new RptParent();
-            rptParent.setRptName(rptParentDto.name);
-            return rptParentRepository.save(rptParent)
-                    .map(RptParent::getRptNr)
-                    .map(rptNr -> rptParentDto.rptChildDtoList.stream().map(rptChildDto -> {
+        return Flux.fromIterable(reports.reports)
+                .flatMap(rptParentDto -> {
+                    RptParent rptParent = new RptParent();
+                    rptParent.setRptName(rptParentDto.name);
+                    return rptParentRepository.save(rptParent)
+                            .map(RptParent::getRptNr)
+                            .map(rptNr -> rptParentDto.rptChildDtoList
+                                    .stream()
+                                    .map(rptChildDto -> {
                                         RptChild rptChild = new RptChild();
                                         rptChild.rptNr = rptNr;
                                         rptChild.pghName = rptChildDto.pghName;
                                         return rptChild;
-                                    }).toList()
+                                    })
+                                    .toList()
                             )
-                    .flatMapMany(rptChildRepository::saveAll)
-                    .then()
-                    .as(transactionalOperator::transactional);
-        }).toList(), objects->null);
+                            .flatMapMany(rptChildRepository::saveAll)
+                            .then()
+                            .as(transactionalOperator::transactional);
+                }).then();
     }
+
 }
